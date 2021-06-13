@@ -70,18 +70,19 @@ def on_connect(client, userdata, flags, rc):
             mqtt_config['payload_not_available'] = MQTT_PAYLOAD_NOT_AVAILABLE
             mqtt_config['state_open'] = MQTT_STATE_OPEN
             mqtt_config['state_closed'] = MQTT_STATE_CLOSED
-            mqtt_config['value_template'] = '{{ value.x }}'
+            mqtt_config['position_template'] = '{{ value.x }}'
             # The following two device registry entries seem to cause problems for homeassistant
             # Not entirely sure why, as I think the payload conforms to the documentation
-#            mqtt_config['manufacturer'] = 'Somfy'
-#            mqtt_config['model'] = 'RTS 485 Transmitter'
+            mqtt_config['manufacturer'] = 'Somfy'
+            mqtt_config['model'] = 'RTS 485 Transmitter'
             for i in range(config.getint(node_address_str, 'channels')):
                 if config.has_option(node_address_str, f'channel {i} name'):
                     mqtt_config['name'] = config[node_address_str][f'channel {i} name']
                 else:
                     mqtt_config['name'] = node_label + str(i)
                     
-                mqtt_config['unique_id'] = f"UID{node_address:06x}{mqtt_config['name']}"
+#                mqtt_config['unique_id'] = f"UID{node_address:06x}{mqtt_config['name']}"
+                mqtt_config['unique_id'] = node_label + str(i)
                 mqtt_config['command_topic'] = MQTT_DISCOVERY_PREFIX + '/' + \
                                                MQTT_COMPONENT + '/' + \
                                                node_label + str(i) + '/' + \
@@ -90,14 +91,14 @@ def on_connect(client, userdata, flags, rc):
                                              MQTT_COMPONENT + '/' + \
                                              node_label + str(i) + '/' + \
                                              MQTT_STATE_TOPIC 
-#                mqtt_config['position_topic'] = MQTT_DISCOVERY_PREFIX + '/' + \
-#                                                MQTT_COMPONENT + '/' + \
-#                                                node_label + str(i) + '/' + \
-#                                                MQTT_POSITION_TOPIC 
-#                mqtt_config['set_position_topic'] = MQTT_DISCOVERY_PREFIX + '/' + \
-#                                                    MQTT_COMPONENT + '/' + \
-#                                                    node_label + str(i) + '/' + \
-#                                                    MQTT_SET_POSITION_TOPIC 
+                mqtt_config['position_topic'] = MQTT_DISCOVERY_PREFIX + '/' + \
+                                                MQTT_COMPONENT + '/' + \
+                                                node_label + str(i) + '/' + \
+                                                MQTT_POSITION_TOPIC 
+                mqtt_config['set_position_topic'] = MQTT_DISCOVERY_PREFIX + '/' + \
+                                                    MQTT_COMPONENT + '/' + \
+                                                    node_label + str(i) + '/' + \
+                                                    MQTT_SET_POSITION_TOPIC 
                 json_payload = json.dumps(mqtt_config, indent=4)
                 
                 client.publish(MQTT_DISCOVERY_PREFIX + '/' + MQTT_COMPONENT + '/' +
@@ -105,8 +106,8 @@ def on_connect(client, userdata, flags, rc):
                                payload=json_payload, retain=True)
                 client.subscribe(MQTT_DISCOVERY_PREFIX + '/' + MQTT_COMPONENT + '/'  +
                                  node_label + str(i) + '/' + MQTT_CMD_TOPIC)
-#                     client.subscribe(MQTT_DISCOVERY_PREFIX + '/' + MQTT_COMPONENT + '/'  +
-#                                      node_label + str(i) + '/' + MQTT_SET_POSITION_TOPIC)
+                client.subscribe(MQTT_DISCOVERY_PREFIX + '/' + MQTT_COMPONENT + '/'  +
+                                 node_label + str(i) + '/' + MQTT_SET_POSITION_TOPIC)
     elif rc == 1:
         logger.error('MQTT broker connection error: Connection refused - '
                      'incorrect protocol version.')

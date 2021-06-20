@@ -73,8 +73,11 @@ def on_connect(client, userdata, flags, rc):
             mqtt_config['position_template'] = '{{ value.x }}'
             # The following two device registry entries seem to cause problems for homeassistant
             # Not entirely sure why, as I think the payload conforms to the documentation
-            mqtt_config['manufacturer'] = 'Somfy'
-            mqtt_config['model'] = 'RTS 485 Transmitter'
+            mqtt_config['device'] = {'identifiers': [node_label, node_address_str],
+                                     'manufacturer': 'Somfy', 
+                                     'model': 'RTS 485 Transmitter'}
+#            mqtt_config['manufacturer'] = 'Somfy'
+#            mqtt_config['model'] = 'RTS 485 Transmitter'
             for i in range(config.getint(node_address_str, 'channels')):
                 if config.has_option(node_address_str, f'channel {i} name'):
                     mqtt_config['name'] = config[node_address_str][f'channel {i} name']
